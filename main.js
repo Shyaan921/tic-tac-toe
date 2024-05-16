@@ -22,11 +22,12 @@ function players(name, symbol) {
 };
 
 function gameController() {
+    let boardArray = gameboard.getBoardArray();
     let playerOneName = 'playerOne';
     let playerTwoName = 'playerTwo';
 
-    let player1 = players(playerOneName, 'meow')
-    let player2 = players(playerTwoName, 'woof')
+    let player1 = players(playerOneName, 1)
+    let player2 = players(playerTwoName, 2)
     let activePlayer = player1;
 
     const getActivePlayer = () => activePlayer;
@@ -41,9 +42,61 @@ function gameController() {
     const playRound = function(row, column) {
 
         gameboard.markSymbol(row, column, getActivePlayer());
-        console.log(gameboard.printBoardArray())
+        gameboard.printBoardArray()
+        console.log(checkForWin())
         toggleActivePlayer();
     };  
 
+    const checkForWin = function() {
+        if ((!checkForDraw()) && ((checkRows()) || (checkColumns()) || (checkDiagonals()))) {
+            return true
+        } else {
+            return false;
+        }
+    };
+
+    const checkForDraw = function() {
+        for (let i = 0; i < boardArray.length; i++) {
+            for (let j = 0; j < boardArray.length; j++) {
+                if (boardArray[i][j] === '') {
+                    return false;
+                }
+            };
+        };
+        return true;
+    };
+
+    const checkRows = function() {
+        for (let i = 0; i < boardArray.length; i++) {
+            if (((boardArray[i][0] === boardArray[i][1]) && (boardArray[i][0] === boardArray[i][2])) && (boardArray[i][0] !== '')) {
+                return true;
+            }
+        };
+        return false;
+    };
+
+    const checkColumns = function() {
+        for (let i = 0; i < boardArray.length; i++) {
+            if (((boardArray[0][i] === boardArray[1][i]) && (boardArray[0][i] === boardArray[2][i])) && (boardArray[0][i] !== '')) {
+                return true;
+            }
+        };
+        return false;
+    };
+
+    const checkDiagonals = function() {
+        if (((boardArray[1][1] === boardArray[0][0]) && (boardArray[1][1] === boardArray[2][2])) || ((boardArray[1][1] === boardArray[2][0]) && (boardArray[1][1] === boardArray[0][2])) && (boardArray[1][1] !== '')) {
+            return true;
+        }
+        return false;
+    };
+
     return{ getActivePlayer, toggleActivePlayer, playRound }
 };
+
+let ttt = gameController()
+ttt.playRound(0, 0)
+ttt.playRound(1, 0)
+ttt.playRound(0, 1)
+ttt.playRound(1, 1)
+ttt.playRound(0, 2) 
