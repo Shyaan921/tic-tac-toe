@@ -1,5 +1,5 @@
 const gameboard = (function() {
-    const boardArray = [['', '', ''], ['', '', ''], ['', '', '']];
+    const boardArray = [['x', 'o', 'x'], ['x', 'o', 'o'], ['x', 'x', 'o']];
 
     const getBoardArray = () => boardArray;
     const markSymbol = function(row, column, player) {
@@ -10,7 +10,7 @@ const gameboard = (function() {
             console.log(boardArray[row]);
         }
     };
-    return { boardArray, getBoardArray, printBoardArray, markSymbol };
+    return { getBoardArray, printBoardArray, markSymbol };
 }) ();
 
 function players(name, symbol) {
@@ -26,8 +26,8 @@ function gameController() {
     let playerOneName = 'playerOne';
     let playerTwoName = 'playerTwo';
 
-    let player1 = players(playerOneName, 1)
-    let player2 = players(playerTwoName, 2)
+    let player1 = players(playerOneName, '⭕')
+    let player2 = players(playerTwoName, '❌')
     let activePlayer = player1;
 
     const getActivePlayer = () => activePlayer;
@@ -94,9 +94,29 @@ function gameController() {
     return{ getActivePlayer, toggleActivePlayer, playRound }
 };
 
+const display =  (function() {
+    let boardArray = gameboard.getBoardArray();
+    
+    const displayBoardArray = function() {
+        for (let i = 0; i < boardArray.length; i++) {
+            let content = document.querySelector('.content')
+            for (let j = 0; j < boardArray.length; j++) {
+                let div = document.createElement('div')
+                div.classList = 'box';
+                div.innerText = boardArray[i][j];
+                content.appendChild(div);
+
+            };
+        }
+    };
+    return { displayBoardArray }
+}) ()
+
 let ttt = gameController()
 ttt.playRound(0, 0)
 ttt.playRound(1, 0)
 ttt.playRound(0, 1)
 ttt.playRound(1, 1)
 ttt.playRound(0, 2) 
+
+display.displayBoardArray()
