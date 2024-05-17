@@ -1,16 +1,33 @@
 const gameboard = (function() {
-    const boardArray = [['x', 'o', 'x'], ['x', 'o', 'o'], ['x', 'x', 'o']];
+    const Array = [['', '', ''], ['', '', ''], ['', '', '']];
 
-    const getBoardArray = () => boardArray;
-    const markSymbol = function(row, column, player) {
-        boardArray[row][column] = player.symbol;
-    };
-    const printBoardArray = function() {
-        for (row in boardArray) {
-            console.log(boardArray[row]);
+    const getArray = () => Array;
+    const updateArray = function(row, column, symbol) {
+        if (Array[row][column] === '') {
+            Array[row][column] = symbol;
+            return true;
         }
     };
-    return { getBoardArray, printBoardArray, markSymbol };
+    const displayArray = function() {
+        let content = document.querySelector('.content')
+        content.innerHTML = '';
+        for (let i = 0; i < Array.length; i++) {
+            for (let j = 0; j < Array.length; j++) {
+                let div = document.createElement('button')
+                div.classList = 'box';
+                div.dataset.row = i;
+                div.dataset.column = j;
+                div.innerText = Array[i][j];
+                if (Array[i][j] === '⭕') {
+                    div.style.color = '#ff477e'
+                } else if ( Array[i][j] === '❌') {
+                    div.style.color = '#f9bec7'
+                }
+                content.appendChild(div)
+            };
+        }
+    };
+    return { getArray, updateArray, displayArray };
 }) ();
 
 function players(name, symbol) {
@@ -21,10 +38,8 @@ function players(name, symbol) {
     return { name, symbol, getWins, incWins };
 };
 
-function gameController() {
-    let boardArray = gameboard.getBoardArray();
-    let playerOneName = 'playerOne';
-    let playerTwoName = 'playerTwo';
+const gameController = (function (playerOneName = 'Player 1', playerTwoName = 'Player 2') {
+    let Array = gameboard.getArray();
 
     let player1 = players(playerOneName, '⭕')
     let player2 = players(playerTwoName, '❌')
@@ -32,7 +47,7 @@ function gameController() {
 
     const getActivePlayer = () => activePlayer;
     const toggleActivePlayer = function() {
-        if (activePlayer == player1) {
+        if (activePlayer ===  player1) {
             activePlayer = player2;
         } else {
             activePlayer = player1;
@@ -40,15 +55,14 @@ function gameController() {
     };
 
     const playRound = function(row, column) {
+        if (gameboard.updateArray(row, column, getActivePlayer().symbol)) {
+            return true;
+        }
 
-        gameboard.markSymbol(row, column, getActivePlayer());
-        gameboard.printBoardArray()
-        console.log(checkForWin())
-        toggleActivePlayer();
     };  
 
     const checkForWin = function() {
-        if ((!checkForDraw()) && ((checkRows()) || (checkColumns()) || (checkDiagonals()))) {
+        if (((checkRows()) || (checkColumns()) || (checkDiagonals()))) {
             return true
         } else {
             return false;
@@ -56,9 +70,9 @@ function gameController() {
     };
 
     const checkForDraw = function() {
-        for (let i = 0; i < boardArray.length; i++) {
-            for (let j = 0; j < boardArray.length; j++) {
-                if (boardArray[i][j] === '') {
+        for (let i = 0; i < Array.length; i++) {
+            for (let j = 0; j < Array.length; j++) {
+                if (Array[i][j] === '') {
                     return false;
                 }
             };
@@ -67,17 +81,20 @@ function gameController() {
     };
 
     const checkRows = function() {
-        for (let i = 0; i < boardArray.length; i++) {
-            if (((boardArray[i][0] === boardArray[i][1]) && (boardArray[i][0] === boardArray[i][2])) && (boardArray[i][0] !== '')) {
+        for (let i = 0; i < Array.length; i++) {
+            if (((Array[i][0] === Array[i][1]) && (Array[i][0] === Array[i][2])) && (Array[i][0] !== '')) {
+                console.log("rows")
                 return true;
+                
             }
         };
         return false;
     };
 
     const checkColumns = function() {
-        for (let i = 0; i < boardArray.length; i++) {
-            if (((boardArray[0][i] === boardArray[1][i]) && (boardArray[0][i] === boardArray[2][i])) && (boardArray[0][i] !== '')) {
+        for (let i = 0; i < Array.length; i++) {
+            if (((Array[0][i] === Array[1][i]) && (Array[0][i] === Array[2][i])) && (Array[0][i] !== '')) {
+                console.log('columns')
                 return true;
             }
         };
@@ -85,38 +102,74 @@ function gameController() {
     };
 
     const checkDiagonals = function() {
-        if (((boardArray[1][1] === boardArray[0][0]) && (boardArray[1][1] === boardArray[2][2])) || ((boardArray[1][1] === boardArray[2][0]) && (boardArray[1][1] === boardArray[0][2])) && (boardArray[1][1] !== '')) {
-            return true;
+        if (((Array[0][0] === Array[1][1]) && (Array[0][0] === Array[2][2])) || ((Array[0][2] === Array[1][1]) && (Array[0][2] === Array[2][0]))) {
+            if (Array[1][1] !== '') {
+                return true;
+            }
         }
         return false;
     };
 
-    return{ getActivePlayer, toggleActivePlayer, playRound }
-};
+    const disableButtons = function() {
+        let buttons = document.querySelectorAll('.box')
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].disabled = true;
+        };
+    }
 
-const display =  (function() {
-    let boardArray = gameboard.getBoardArray();
-    
-    const displayBoardArray = function() {
-        for (let i = 0; i < boardArray.length; i++) {
-            let content = document.querySelector('.content')
-            for (let j = 0; j < boardArray.length; j++) {
-                let div = document.createElement('div')
-                div.classList = 'box';
-                div.innerText = boardArray[i][j];
-                content.appendChild(div);
-
-            };
-        }
-    };
-    return { displayBoardArray }
+    return{ getActivePlayer, toggleActivePlayer, playRound, checkForWin, checkForDraw, disableButtons }
 }) ()
 
-let ttt = gameController()
-ttt.playRound(0, 0)
-ttt.playRound(1, 0)
-ttt.playRound(0, 1)
-ttt.playRound(1, 1)
-ttt.playRound(0, 2) 
+function screenController() {
+    let Array = gameboard.getArray()
+    let game = gameController
+    let playerOneName = document.querySelector('.player1 .name')
+    let playerTwoName = document.querySelector('.player2 .name')
+    let playerOneSymbol = document.querySelector('.player1 .symbol')
+    let playerTwoSymbol = document.querySelector('.player2 .symbol')
+    let footer = document.querySelector('.footer p')
+    let content = document.querySelector('.content')
+    let resetBtn = document.querySelector('.reset')
 
-display.displayBoardArray()
+    function startDisplay() {
+        gameboard.displayArray();
+        footer.innerText = game.getActivePlayer().name + "'s turn"
+
+        playerOneName.innerText = game.getActivePlayer().name
+        playerOneSymbol.innerText = game.getActivePlayer().symbol
+        game.toggleActivePlayer()
+        playerTwoName.innerText = game.getActivePlayer().name
+        playerTwoSymbol.innerText = game.getActivePlayer().symbol
+        game.toggleActivePlayer()
+    }
+
+    function changeDisplay() {
+        gameboard.displayArray();
+
+        if (game.checkForWin()) {
+            footer.innerText = game.getActivePlayer().name + ' wins'
+            game.disableButtons()
+        } else if (game.checkForDraw()) {
+            footer.innerText = "Game ended in a draw"
+            game.disableButtons()
+        } else {
+            game.toggleActivePlayer()
+            footer.innerText = game.getActivePlayer().name + "'s turn"
+        }
+    };
+
+    function clickHandler(e) {
+        const selectedRow = e.target.dataset.row;
+        const selectedColumn = e.target.dataset.column;
+
+        
+        if (game.playRound(selectedRow, selectedColumn)) {
+            changeDisplay();
+        }
+    }
+
+    startDisplay();
+    content.addEventListener('click', clickHandler);
+}
+
+screenController()
